@@ -1,15 +1,12 @@
 # Obesity Level Classification - Machine Learning Assignment 2
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](YOUR_STREAMLIT_APP_LINK_HERE)
-
-## 📋 Table of Contents
+## Table of Contents
 - [Problem Statement](#problem-statement)
 - [Dataset Description](#dataset-description)
 - [Models Used](#models-used)
 - [Model Performance Comparison](#model-performance-comparison)
 - [Observations](#observations)
 - [Streamlit App Features](#streamlit-app-features)
-- [Author](#author)
 
 ---
 
@@ -147,41 +144,8 @@ Six machine learning classification models were implemented:
 5. **Feature Importance:** Weight, Height, Age, and family history with overweight emerge as the most predictive features across all models.
 
 
-
-
-## Streamlit App Features
-
- **Dataset Upload Option (CSV)** - Upload test data for batch predictions
-
- **Model Selection Dropdown** - Choose from 6 implemented ML models
-
- **Display of Evaluation Metrics** - View Accuracy, AUC, Precision, Recall, F1, MCC
-
- **Confusion Matrix Visualization** - Interactive heatmap display
-
- **Classification Report** - Detailed per-class metrics
-
- **Individual Prediction** - Manual input for single predictions
-
- **Probability Distribution** - Visualization of prediction confidence
-
- **Download Predictions** - Export results as CSV
-
----
-
 ## Author
 
-**[Your Name]**  
-M.Tech (AIML/DSE)  
-BITS Pilani - Work Integrated Learning Programme
+**S Harish Sankaranarayanan**  
+**2025AA05227**  
 
-**Course:** Machine Learning  
-**Assignment:** Assignment 2  
-**Submission Deadline:** 15-Feb-2026
-
-## References
-
-1. Kaggle - Obesity Dataset 
-2. Scikit-learn Documentation
-3. XGBoost Documentation
-4. Streamlit Documentation

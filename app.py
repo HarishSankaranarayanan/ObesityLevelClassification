@@ -12,7 +12,7 @@ Features:
 - Classification report
 - Individual prediction capability
 
-Author: [Your Name]
+Author: S Harish Sankaranarayanan 
 Date: February 2026
 """
 
@@ -365,15 +365,15 @@ def main():
             best_model = results_df.loc[best_idx, 'Model']
             best_accuracy = results_df.loc[best_idx, 'Accuracy']
             
-            st.success(f"🏆 **Best Model:** {best_model} with Accuracy: {best_accuracy:.4f}")
+            st.success(f"**Best Model:** {best_model} with Accuracy: {best_accuracy:.4f}")
             
             # Metrics visualization
-            st.subheader("📊 Metrics Visualization")
+            st.subheader(" Metrics Visualization")
             fig = plot_metrics_comparison(results_df)
             st.pyplot(fig)
             
             # Individual model details
-            st.subheader("🔍 Selected Model Details")
+            st.subheader("Selected Model Details")
             model_metrics = results_df[results_df['Model'] == selected_model].iloc[0]
             
             col1, col2, col3 = st.columns(3)
@@ -392,7 +392,7 @@ def main():
     
 
     with tab3:
-        st.header("🎯 Make Individual Prediction")
+        st.header(" Make Individual Prediction")
         st.markdown("Enter the values below to predict the obesity level for an individual.")
         
         col1, col2, col3 = st.columns(3)
@@ -423,7 +423,7 @@ def main():
                                  ["Automobile", "Motorbike", "Bike", 
                                   "Public_Transportation", "Walking"])
         
-        if st.button("🔮 Predict Obesity Level", type="primary"):
+        if st.button("Predict Obesity Level", type="primary"):
             # Create input dataframe
             input_data = pd.DataFrame({
                 'Gender': [gender],
@@ -498,11 +498,11 @@ def main():
             
             # BMI calculation
             bmi = weight / (height ** 2)
-            st.info(f"📏 **Calculated BMI:** {bmi:.2f}")
+            st.info(f" **Calculated BMI:** {bmi:.2f}")
     
 
     with tab4:
-        st.header("ℹ️ About This Application")
+        st.header("About This Application")
         
         st.markdown("""
         ### Project Overview
@@ -514,7 +514,7 @@ def main():
         ###  Dataset Information
         
         - **Name:** Estimation of Obesity Levels Based on Eating Habits and Physical Condition
-        - **Source:** UCI Machine Learning Repository (ID: 544)
+        - **Source:** Kaggle
         - **Instances:** 2,111
         - **Features:** 16 (8 categorical + 8 numerical)
         - **Target Classes:** 7 obesity levels
@@ -550,12 +550,7 @@ def main():
         
         **S Harish Sankaranarayanan**  
     
-        
-        ###  Assignment Details
-        
-        - **Course:** Machine Learning
-        - **Assignment:** Assignment 2
-        - **Submission Deadline:** 15-Feb-2026
+    
         """)
         
         # Feature descriptions
