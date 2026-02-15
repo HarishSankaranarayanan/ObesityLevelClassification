@@ -26,7 +26,6 @@ import seaborn as sns
 from sklearn.metrics import (accuracy_score, roc_auc_score, precision_score,
                             recall_score, f1_score, matthews_corrcoef,
                             classification_report, confusion_matrix)
-from sklearn.preprocessing import LabelEncoder, StandardScaler
 
 # Page configuration
 st.set_page_config(
@@ -36,35 +35,35 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for better styling
+# Minimal clean styling
 st.markdown("""
 <style>
     .main-header {
         font-size: 2.5rem;
-        font-weight: bold;
-        color: #1E88E5;
+        font-weight: 600;
+        color: #0066cc;
         text-align: center;
-        margin-bottom: 1rem;
+        margin-bottom: 0.5rem;
     }
     .sub-header {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         color: #666;
         text-align: center;
         margin-bottom: 2rem;
     }
-    .metric-card {
-        background-color: #f0f2f6;
-        border-radius: 10px;
+    .download-box {
+        background-color: #f0f8ff;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 1px solid #cce5ff;
+        margin: 1rem 0;
+    }
+    .info-box {
+        background-color: #f8f9fa;
         padding: 1rem;
-        text-align: center;
-    }
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 24px;
-    }
-    .stTabs [data-baseweb="tab"] {
-        height: 50px;
-        padding-left: 20px;
-        padding-right: 20px;
+        border-left: 4px solid #0066cc;
+        border-radius: 4px;
+        margin: 1rem 0;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -92,7 +91,6 @@ def load_models():
         if os.path.exists(filepath):
             models[name] = joblib.load(filepath)
     
-    # Load preprocessors
     scaler = joblib.load('saved_models/scaler.pkl')
     label_encoders = joblib.load('saved_models/label_encoders.pkl')
     target_encoder = joblib.load('saved_models/target_encoder.pkl')
@@ -104,21 +102,17 @@ def preprocess_data(df, label_encoders, scaler):
     """Preprocess the uploaded data."""
     df_processed = df.copy()
     
-    # Define column types
     categorical_cols = ['Gender', 'family_history_with_overweight', 'FAVC', 
                        'CAEC', 'SMOKE', 'SCC', 'CALC', 'MTRANS']
     numerical_cols = ['Age', 'Height', 'Weight', 'FCVC', 'NCP', 'CH2O', 'FAF', 'TUE']
     
-    # Encode categorical features
     for col in categorical_cols:
         if col in df_processed.columns and col in label_encoders:
             le = label_encoders[col]
-            # Handle unseen labels
             df_processed[col] = df_processed[col].apply(
                 lambda x: le.transform([x])[0] if x in le.classes_ else -1
             )
     
-    # Scale numerical features
     if all(col in df_processed.columns for col in numerical_cols):
         df_processed[numerical_cols] = scaler.transform(df_processed[numerical_cols])
     
@@ -165,18 +159,18 @@ def plot_metrics_comparison(results_df):
     """Create bar chart comparing model metrics."""
     fig, axes = plt.subplots(2, 3, figsize=(15, 10))
     metrics = ['Accuracy', 'AUC', 'Precision', 'Recall', 'F1', 'MCC']
-    colors = ['#1E88E5', '#43A047', '#FB8C00', '#E53935', '#8E24AA', '#00ACC1']
+    colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b']
     
     for idx, (metric, color) in enumerate(zip(metrics, colors)):
         ax = axes[idx // 3, idx % 3]
-        bars = ax.bar(results_df['Model'], results_df[metric], color=color, alpha=0.8)
+        bars = ax.bar(results_df['Model'], results_df[metric], color=color, alpha=0.7)
         ax.set_title(metric, fontsize=12, fontweight='bold')
         ax.set_ylim(0, 1)
-        ax.set_xticklabels(results_df['Model'], rotation=45, ha='right', fontsize=8)
+        ax.set_xticklabels(results_df['Model'], rotation=45, ha='right', fontsize=9)
+        ax.grid(axis='y', alpha=0.3)
         
-        # Add value labels on bars
         for bar, val in zip(bars, results_df[metric]):
-            ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.02, 
+            ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.02,
                    f'{val:.3f}', ha='center', va='bottom', fontsize=8)
     
     plt.tight_layout()
@@ -189,55 +183,46 @@ def plot_metrics_comparison(results_df):
 
 def main():
     # Header
-    st.markdown('<p class="main-header"> Obesity Level Classification</p>', unsafe_allow_html=True)
+    st.markdown('<p class="main-header">Obesity Level Classification</p>', unsafe_allow_html=True)
     st.markdown('<p class="sub-header">Multi-class Classification using Machine Learning Models</p>', unsafe_allow_html=True)
     
     # Load models
     try:
         models, scaler, label_encoders, target_encoder = load_models()
-        st.sidebar.success(" Models loaded successfully!")
+        st.sidebar.success("Models loaded successfully!")
     except Exception as e:
         st.error(f"Error loading models: {e}")
         st.stop()
     
     # Sidebar
-    st.sidebar.header(" Configuration")
+    st.sidebar.header("Configuration")
     
-    # Model selection dropdown
     model_names = list(models.keys())
     selected_model = st.sidebar.selectbox(
-        " Select ML Model",
+        "Select ML Model",
         model_names,
-        index=model_names.index('XGBoost') if 'XGBoost' in model_names else 0
+        help="Choose which model to use for predictions"
     )
     
     st.sidebar.markdown("---")
-    
-    # Dataset information
-    st.sidebar.header(" Dataset Info")
+    st.sidebar.header("Dataset Info")
     st.sidebar.markdown("""
     **Dataset:** Obesity Levels Based on Eating Habits and Physical Condition
     
-    **Source:** Kaggle (https://www.kaggle.com/datasets/aravindpcoder/obesity-or-cvd-risk-classifyregressorcluster/data)
+    **Source:** Kaggle  
+    ([Link](https://www.kaggle.com/datasets/aravindpcoder/obesity-or-cvd-risk-classifyregressorcluster/data))
     
     **Features:** 16
     
     **Classes:** 7
-    - Insufficient Weight
-    - Normal Weight
-    - Overweight Level I
-    - Overweight Level II
-    - Obesity Type I
-    - Obesity Type II
-    - Obesity Type III
     """)
     
-    # Main content with tabs
+    # Main tabs
     tab1, tab2, tab3, tab4 = st.tabs([
-        " Upload & Predict", 
-        " Model Metrics", 
-        " Individual Prediction",
-        " About"
+        "Upload & Predict", 
+        "Model Comparison",
+        "Individual Prediction",
+        "About"
     ])
     
     # ============================================
@@ -246,181 +231,266 @@ def main():
     with tab1:
         st.header("Upload Test Data & Generate Predictions")
         
-        st.markdown("""
-        Upload a CSV file containing test data to evaluate the selected model. 
-        The CSV should contain all feature columns and optionally the target column ('NObeyesdad').
-        """)
+        # Download test data section
+        st.markdown('<div class="download-box">', unsafe_allow_html=True)
+        st.subheader("Download Test Data")
+        st.write("Download sample test data to evaluate the model or use as template:")
         
-        # File upload
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            if os.path.exists('test_data.csv'):
+                with open('test_data.csv', 'rb') as f:
+                    st.download_button(
+                        label="Download Full Test Data (423 rows)",
+                        data=f,
+                        file_name="test_data.csv",
+                        mime="text/csv",
+                        use_container_width=True
+                    )
+        
+        with col2:
+            if os.path.exists('test_data_sample.csv'):
+                with open('test_data_sample.csv', 'rb') as f:
+                    st.download_button(
+                        label="Download Sample Data (50 rows)",
+                        data=f,
+                        file_name="test_data_sample.csv",
+                        mime="text/csv",
+                        use_container_width=True
+                    )
+        
+        with col3:
+            if os.path.exists('train_data.csv'):
+                with open('train_data.csv', 'rb') as f:
+                    st.download_button(
+                        label="Download Training Data (1688 rows)",
+                        data=f,
+                        file_name="train_data.csv",
+                        mime="text/csv",
+                        use_container_width=True
+                    )
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown("---")
+        
+        # Upload section
+        st.markdown("""
+        <div class="info-box">
+        <strong>File Requirements:</strong>
+        <ul>
+            <li>CSV format with all 16 feature columns</li>
+            <li>Optionally include 'NObeyesdad' column for evaluation</li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        
         uploaded_file = st.file_uploader(
             "Choose a CSV file",
             type=['csv'],
-            help="Upload test data in CSV format"
+            help="Upload test data for model evaluation"
         )
         
         if uploaded_file is not None:
             try:
                 df = pd.read_csv(uploaded_file)
-                st.success(f"File uploaded successfully! Shape: {df.shape}")
+                st.success(f"File uploaded successfully! Shape: {df.shape[0]} rows × {df.shape[1]} columns")
                 
                 # Show data preview
-                with st.expander(" Data Preview", expanded=True):
+                with st.expander("Data Preview", expanded=True):
                     st.dataframe(df.head(10), use_container_width=True)
                 
                 # Check if target column exists
                 has_target = 'NObeyesdad' in df.columns
                 
                 if has_target:
+                    st.info("Target column 'NObeyesdad' found - Will show evaluation metrics")
                     y_true = target_encoder.transform(df['NObeyesdad'])
                     X = df.drop('NObeyesdad', axis=1)
                 else:
+                    st.warning("No target column found - Will only show predictions")
                     X = df.copy()
                 
                 # Preprocess data
                 X_processed = preprocess_data(X, label_encoders, scaler)
                 
-                # Get selected model
+                # Get model and predict
                 model = models[selected_model]
-                
-                # Make predictions
                 y_pred = model.predict(X_processed)
                 y_prob = model.predict_proba(X_processed)
                 
                 # Decode predictions
-                y_pred_labels = target_encoder.inverse_transform(y_pred)
+                predictions = target_encoder.inverse_transform(y_pred)
                 
-                # Show predictions
-                st.subheader(" Predictions")
-                results_df = X.copy()
-                results_df['Predicted_Obesity_Level'] = y_pred_labels
+                # Display results
+                st.markdown("---")
+                st.subheader("Prediction Results")
                 
-                if has_target:
-                    results_df['Actual_Obesity_Level'] = df['NObeyesdad']
-                    results_df['Correct'] = results_df['Predicted_Obesity_Level'] == results_df['Actual_Obesity_Level']
+                # Add predictions to dataframe
+                results_df = df.copy()
+                results_df['Predicted_Obesity_Level'] = predictions
+                results_df['Prediction_Confidence'] = y_prob.max(axis=1).round(3)
                 
                 st.dataframe(results_df, use_container_width=True)
                 
                 # Download predictions
                 csv = results_df.to_csv(index=False)
                 st.download_button(
-                    label=" Download Predictions as CSV",
+                    label="Download Predictions as CSV",
                     data=csv,
-                    file_name="predictions.csv",
+                    file_name=f"predictions_{selected_model.lower().replace(' ', '_')}.csv",
                     mime="text/csv"
                 )
                 
-                # If target column exists, show evaluation metrics
+                # Show metrics if target exists
                 if has_target:
-                    st.subheader(f" Evaluation Metrics for {selected_model}")
+                    st.markdown("---")
+                    st.subheader("Model Performance Metrics")
                     
-                    metrics = calculate_metrics(y_true, y_pred, y_prob, len(target_encoder.classes_))
+                    num_classes = len(target_encoder.classes_)
+                    metrics = calculate_metrics(y_true, y_pred, y_prob, num_classes)
                     
                     # Display metrics in columns
                     col1, col2, col3, col4, col5, col6 = st.columns(6)
                     
-                    with col1:
-                        st.metric("Accuracy", f"{metrics['Accuracy']:.4f}")
-                    with col2:
-                        st.metric("AUC Score", f"{metrics['AUC']:.4f}")
-                    with col3:
-                        st.metric("Precision", f"{metrics['Precision']:.4f}")
-                    with col4:
-                        st.metric("Recall", f"{metrics['Recall']:.4f}")
-                    with col5:
-                        st.metric("F1 Score", f"{metrics['F1']:.4f}")
-                    with col6:
-                        st.metric("MCC", f"{metrics['MCC']:.4f}")
+                    col1.metric("Accuracy", f"{metrics['Accuracy']:.2%}")
+                    col2.metric("AUC", f"{metrics['AUC']:.3f}")
+                    col3.metric("Precision", f"{metrics['Precision']:.3f}")
+                    col4.metric("Recall", f"{metrics['Recall']:.3f}")
+                    col5.metric("F1 Score", f"{metrics['F1']:.3f}")
+                    col6.metric("MCC", f"{metrics['MCC']:.3f}")
                     
                     # Confusion Matrix
-                    st.subheader(" Confusion Matrix")
+                    st.markdown("---")
+                    st.subheader("Confusion Matrix")
+                    
                     fig = plot_confusion_matrix(y_true, y_pred, target_encoder.classes_)
                     st.pyplot(fig)
                     
                     # Classification Report
-                    st.subheader(" Classification Report")
-                    report = classification_report(y_true, y_pred, 
-                                                  target_names=target_encoder.classes_,
-                                                  output_dict=True)
-                    report_df = pd.DataFrame(report).transpose()
-                    st.dataframe(report_df.style.format("{:.4f}"), use_container_width=True)
-                    
+                    with st.expander("Detailed Classification Report"):
+                        report = classification_report(y_true, y_pred, 
+                                                      target_names=target_encoder.classes_,
+                                                      output_dict=True)
+                        report_df = pd.DataFrame(report).transpose()
+                        st.dataframe(report_df, use_container_width=True)
+                
             except Exception as e:
                 st.error(f"Error processing file: {e}")
     
     # ============================================
-    # TAB 2: MODEL METRICS COMPARISON
+    # TAB 2: MODEL COMPARISON
     # ============================================
     with tab2:
-        st.header(" Model Performance Comparison")
+        st.header("Model Performance Comparison")
+        
+        st.markdown("""
+        <div class="info-box">
+        <strong>About These Metrics:</strong><br>
+        These performance metrics were calculated during model training on the test dataset (423 samples, 20% of data).
+        All models were trained on the same data split to ensure fair comparison.
+        <br><br>
+        <strong>Data Split:</strong>
+        <ul>
+            <li>Training Set: 1,688 samples (80%)</li>
+            <li>Test Set: 423 samples (20%)</li>
+            <li>Method: Stratified split (maintains class distribution)</li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
         
         # Load pre-computed results
-        try:
+        if os.path.exists('model_results.csv'):
             results_df = pd.read_csv('model_results.csv')
             
-            # Display metrics table
-            st.subheader(" Evaluation Metrics Comparison Table")
+            st.subheader("Performance Metrics Table")
             
-            # Format the dataframe for display
-            styled_df = results_df.style.format({
-                'Accuracy': '{:.4f}',
-                'AUC': '{:.4f}',
-                'Precision': '{:.4f}',
-                'Recall': '{:.4f}',
-                'F1': '{:.4f}',
-                'MCC': '{:.4f}'
-            }).background_gradient(subset=['Accuracy', 'AUC', 'Precision', 'Recall', 'F1', 'MCC'], 
-                                   cmap='RdYlGn')
+            # Highlight best model
+            best_idx = results_df['Accuracy'].idxmax()
+            
+            def highlight_best(row):
+                if row.name == best_idx:
+                    return ['background-color: #d4edda; font-weight: bold'] * len(row)
+                return [''] * len(row)
+            
+            styled_df = results_df.style.apply(highlight_best, axis=1)\
+                                       .format({
+                                           'Accuracy': '{:.4f}',
+                                           'AUC': '{:.4f}',
+                                           'Precision': '{:.4f}',
+                                           'Recall': '{:.4f}',
+                                           'F1': '{:.4f}',
+                                           'MCC': '{:.4f}'
+                                       })
             
             st.dataframe(styled_df, use_container_width=True)
             
-            # Best model highlight
-            best_idx = results_df['Accuracy'].idxmax()
             best_model = results_df.loc[best_idx, 'Model']
             best_accuracy = results_df.loc[best_idx, 'Accuracy']
             
-            st.success(f" **Best Model:** {best_model} with Accuracy: {best_accuracy:.4f}")
+            st.success(f"Best Performing Model: {best_model} with {best_accuracy:.2%} accuracy")
             
-            # Metrics visualization
-            st.subheader("Metrics Visualization")
+            # Visual comparison
+            st.markdown("---")
+            st.subheader("Visual Performance Comparison")
+            
             fig = plot_metrics_comparison(results_df)
             st.pyplot(fig)
             
-            # Individual model details
-            st.subheader("Selected Model Details")
-            model_metrics = results_df[results_df['Model'] == selected_model].iloc[0]
+            # Model Rankings
+            st.markdown("---")
+            st.subheader("Model Rankings by Metric")
             
-            col1, col2, col3 = st.columns(3)
+            col1, col2 = st.columns(2)
+            
             with col1:
-                st.metric("Accuracy", f"{model_metrics['Accuracy']:.4f}")
-                st.metric("AUC", f"{model_metrics['AUC']:.4f}")
-            with col2:
-                st.metric("Precision", f"{model_metrics['Precision']:.4f}")
-                st.metric("Recall", f"{model_metrics['Recall']:.4f}")
-            with col3:
-                st.metric("F1 Score", f"{model_metrics['F1']:.4f}")
-                st.metric("MCC", f"{model_metrics['MCC']:.4f}")
+                st.write("**Top 3 by Accuracy:**")
+                top_acc = results_df.nlargest(3, 'Accuracy')[['Model', 'Accuracy']]
+                for idx, row in top_acc.iterrows():
+                    st.write(f"{idx+1}. {row['Model']}: {row['Accuracy']:.2%}")
                 
-        except Exception as e:
-            st.warning("Pre-computed results not found. Please upload test data in Tab 1 to see metrics.")
+                st.write("")
+                st.write("**Top 3 by AUC:**")
+                top_auc = results_df.nlargest(3, 'AUC')[['Model', 'AUC']]
+                for idx, row in top_auc.iterrows():
+                    st.write(f"{idx+1}. {row['Model']}: {row['AUC']:.4f}")
+            
+            with col2:
+                st.write("**Top 3 by F1 Score:**")
+                top_f1 = results_df.nlargest(3, 'F1')[['Model', 'F1']]
+                for idx, row in top_f1.iterrows():
+                    st.write(f"{idx+1}. {row['Model']}: {row['F1']:.4f}")
+                
+                st.write("")
+                st.write("**Top 3 by MCC:**")
+                top_mcc = results_df.nlargest(3, 'MCC')[['Model', 'MCC']]
+                for idx, row in top_mcc.iterrows():
+                    st.write(f"{idx+1}. {row['Model']}: {row['MCC']:.4f}")
+            
+        else:
+            st.warning("Model results file not found. Please ensure 'model_results.csv' exists.")
     
     # ============================================
     # TAB 3: INDIVIDUAL PREDICTION
     # ============================================
     with tab3:
-        st.header(" Make Individual Prediction")
-        st.markdown("Enter the values below to predict the obesity level for an individual.")
+        st.header("Individual Prediction")
+        st.write("Enter patient information below to predict obesity level:")
         
         col1, col2, col3 = st.columns(3)
         
         with col1:
+            st.subheader("Demographics")
             gender = st.selectbox("Gender", ["Male", "Female"])
-            age = st.slider("Age", 14, 61, 25)
-            height = st.slider("Height (m)", 1.45, 1.98, 1.70, 0.01)
+            age = st.slider("Age (years)", 14, 61, 25)
+            height = st.slider("Height (meters)", 1.45, 1.98, 1.70, 0.01)
             weight = st.slider("Weight (kg)", 39.0, 173.0, 70.0, 0.5)
             family_history = st.selectbox("Family History with Overweight", ["yes", "no"])
             favc = st.selectbox("Frequent High Caloric Food (FAVC)", ["yes", "no"])
         
         with col2:
+            st.subheader("Eating Habits")
             fcvc = st.slider("Vegetable Consumption (FCVC)", 1.0, 3.0, 2.0, 0.1)
             ncp = st.slider("Number of Main Meals (NCP)", 1.0, 4.0, 3.0, 0.1)
             caec = st.selectbox("Food Between Meals (CAEC)", 
@@ -430,6 +500,7 @@ def main():
             scc = st.selectbox("Calorie Monitoring (SCC)", ["yes", "no"])
         
         with col3:
+            st.subheader("Physical Activity & Lifestyle")
             faf = st.slider("Physical Activity Frequency (FAF)", 0.0, 3.0, 1.0, 0.1)
             tue = st.slider("Technology Use Time (TUE)", 0.0, 2.0, 1.0, 0.1)
             calc = st.selectbox("Alcohol Consumption (CALC)", 
@@ -438,7 +509,7 @@ def main():
                                  ["Automobile", "Motorbike", "Bike", 
                                   "Public_Transportation", "Walking"])
         
-        if st.button(" Predict Obesity Level", type="primary"):
+        if st.button("Predict Obesity Level", type="primary"):
             # Create input dataframe
             input_data = pd.DataFrame({
                 'Gender': [gender],
@@ -472,31 +543,20 @@ def main():
             
             # Display result
             st.markdown("---")
-            st.subheader("🎯 Prediction Result")
+            st.subheader("Prediction Result")
             
-            # Color coding based on obesity level
-            color_map = {
-                'Insufficient_Weight': '🔵',
-                'Normal_Weight': '🟢',
-                'Overweight_Level_I': '🟡',
-                'Overweight_Level_II': '🟠',
-                'Obesity_Type_I': '🟠',
-                'Obesity_Type_II': '🔴',
-                'Obesity_Type_III': '🔴'
-            }
-            
-            emoji = color_map.get(predicted_class, '⚪')
-            st.markdown(f"### {emoji} Predicted Obesity Level: **{predicted_class.replace('_', ' ')}**")
+            st.success(f"**Predicted Obesity Level:** {predicted_class.replace('_', ' ')}")
+            st.info(f"**Confidence:** {probabilities.max():.1%}")
             
             # Show probability distribution
-            st.subheader(" Prediction Probabilities")
+            st.subheader("Prediction Probabilities")
             prob_df = pd.DataFrame({
                 'Obesity Level': target_encoder.classes_,
                 'Probability': probabilities
             }).sort_values('Probability', ascending=False)
             
             # Bar chart for probabilities
-            fig, ax = plt.subplots(figsize=(10, 5))
+            fig, ax = plt.subplots(figsize=(10, 6))
             colors = ['#2ecc71' if c == predicted_class else '#3498db' for c in prob_df['Obesity Level']]
             bars = ax.barh(prob_df['Obesity Level'], prob_df['Probability'], color=colors)
             ax.set_xlabel('Probability')
@@ -506,7 +566,7 @@ def main():
             # Add percentage labels
             for bar, prob in zip(bars, prob_df['Probability']):
                 ax.text(bar.get_width() + 0.02, bar.get_y() + bar.get_height()/2,
-                       f'{prob:.1%}', va='center', fontsize=10)
+                       f'{prob:.1%}', va='center')
             
             plt.tight_layout()
             st.pyplot(fig)
@@ -528,10 +588,10 @@ def main():
         classification models** for predicting obesity levels based on eating habits and 
         physical condition.
         
-        ###  Dataset Information
+        ### Dataset Information
         
         - **Name:** Estimation of Obesity Levels Based on Eating Habits and Physical Condition
-        - **Source:** Kaggle (https://www.kaggle.com/datasets/aravindpcoder/obesity-or-cvd-risk-classifyregressorcluster/data)
+        - **Source:** Kaggle (UCI Machine Learning Repository, ID: 544)
         - **Instances:** 2,111
         - **Features:** 16 (8 categorical + 8 numerical)
         - **Target Classes:** 7 obesity levels
@@ -566,7 +626,14 @@ def main():
         ### Author
         
         **S Harish Sankaranarayanan**  
-       
+        M.Tech (AIML/DSE)  
+        BITS Pilani - Work Integrated Learning Programme
+        
+        ### Assignment Details
+        
+        - **Course:** Machine Learning
+        - **Assignment:** Assignment 2
+        - **Submission Deadline:** 15-Feb-2026
         """)
         
         # Feature descriptions
