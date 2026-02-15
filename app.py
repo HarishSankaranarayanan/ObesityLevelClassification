@@ -4,14 +4,6 @@ Obesity Level Classification - Streamlit Web Application
 An interactive web application to demonstrate multiple ML classification 
 models for predicting obesity levels based on eating habits and physical condition.
 
-Features:
-- Dataset upload option (CSV)
-- Model selection dropdown (6 models)
-- Display of evaluation metrics
-- Confusion matrix visualization
-- Classification report
-- Individual prediction capability
-
 Author: S Harish Sankaranarayanan 
 Date: February 2026
 """
@@ -35,35 +27,64 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Minimal clean styling
+# Professional styling with good contrast
 st.markdown("""
 <style>
-    .main-header {
-        font-size: 2.5rem;
+    /* Main headers */
+    h1 {
+        color: #2c3e50;
         font-weight: 600;
-        color: #0066cc;
-        text-align: center;
-        margin-bottom: 0.5rem;
     }
-    .sub-header {
-        font-size: 1.1rem;
-        color: #666;
-        text-align: center;
-        margin-bottom: 2rem;
+    
+    h2 {
+        color: #34495e;
+        font-weight: 500;
+        padding-top: 1rem;
     }
-    .download-box {
-        background-color: #f0f8ff;
+    
+    h3 {
+        color: #34495e;
+    }
+    
+    /* Download section with proper contrast */
+    .download-section {
+        background-color: #f8f9fa;
         padding: 1.5rem;
         border-radius: 8px;
-        border: 1px solid #cce5ff;
-        margin: 1rem 0;
+        border-left: 4px solid #3498db;
+        margin: 1.5rem 0;
     }
-    .info-box {
-        background-color: #f8f9fa;
+    
+    /* Info boxes with readable colors */
+    .info-note {
+        background-color: #e8f4f8;
         padding: 1rem;
-        border-left: 4px solid #0066cc;
-        border-radius: 4px;
+        border-radius: 6px;
+        border-left: 3px solid #3498db;
         margin: 1rem 0;
+        color: #2c3e50;
+    }
+    
+    /* Success message */
+    .success-note {
+        background-color: #d4edda;
+        padding: 1rem;
+        border-radius: 6px;
+        border-left: 3px solid #28a745;
+        margin: 1rem 0;
+        color: #155724;
+    }
+    
+    /* Better dataframe styling */
+    .dataframe {
+        font-size: 0.9rem;
+    }
+    
+    /* Section dividers */
+    hr {
+        margin: 2rem 0;
+        border: none;
+        border-top: 1px solid #dee2e6;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -159,7 +180,7 @@ def plot_metrics_comparison(results_df):
     """Create bar chart comparing model metrics."""
     fig, axes = plt.subplots(2, 3, figsize=(15, 10))
     metrics = ['Accuracy', 'AUC', 'Precision', 'Recall', 'F1', 'MCC']
-    colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b']
+    colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c']
     
     for idx, (metric, color) in enumerate(zip(metrics, colors)):
         ax = axes[idx // 3, idx % 3]
@@ -183,8 +204,8 @@ def plot_metrics_comparison(results_df):
 
 def main():
     # Header
-    st.markdown('<p class="main-header">Obesity Level Classification</p>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">Multi-class Classification using Machine Learning Models</p>', unsafe_allow_html=True)
+    st.title("Obesity Level Classification")
+    st.markdown("### Multi-class Classification using Machine Learning Models")
     
     # Load models
     try:
@@ -232,7 +253,7 @@ def main():
         st.header("Upload Test Data & Generate Predictions")
         
         # Download test data section
-        st.markdown('<div class="download-box">', unsafe_allow_html=True)
+        st.markdown('<div class="download-section">', unsafe_allow_html=True)
         st.subheader("Download Test Data")
         st.write("Download sample test data to evaluate the model or use as template:")
         
@@ -276,15 +297,7 @@ def main():
         st.markdown("---")
         
         # Upload section
-        st.markdown("""
-        <div class="info-box">
-        <strong>File Requirements:</strong>
-        <ul>
-            <li>CSV format with all 16 feature columns</li>
-            <li>Optionally include 'NObeyesdad' column for evaluation</li>
-        </ul>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown('<div class="info-note"><strong>File Requirements:</strong><ul><li>CSV format with all 16 feature columns</li><li>Optionally include \'NObeyesdad\' column for evaluation</li></ul></div>', unsafe_allow_html=True)
         
         uploaded_file = st.file_uploader(
             "Choose a CSV file",
@@ -385,20 +398,7 @@ def main():
     with tab2:
         st.header("Model Performance Comparison")
         
-        st.markdown("""
-        <div class="info-box">
-        <strong>About These Metrics:</strong><br>
-        These performance metrics were calculated during model training on the test dataset (423 samples, 20% of data).
-        All models were trained on the same data split to ensure fair comparison.
-        <br><br>
-        <strong>Data Split:</strong>
-        <ul>
-            <li>Training Set: 1,688 samples (80%)</li>
-            <li>Test Set: 423 samples (20%)</li>
-            <li>Method: Stratified split (maintains class distribution)</li>
-        </ul>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown('<div class="info-note"><strong>About These Metrics:</strong><br>These performance metrics were calculated during model training on the test dataset (423 samples, 20% of data). All models were trained on the same data split to ensure fair comparison.<br><br><strong>Data Split:</strong><ul><li>Training Set: 1,688 samples (80%)</li><li>Test Set: 423 samples (20%)</li><li>Method: Stratified split (maintains class distribution)</li></ul></div>', unsafe_allow_html=True)
         
         # Load pre-computed results
         if os.path.exists('model_results.csv'):
@@ -487,25 +487,25 @@ def main():
             height = st.slider("Height (meters)", 1.45, 1.98, 1.70, 0.01)
             weight = st.slider("Weight (kg)", 39.0, 173.0, 70.0, 0.5)
             family_history = st.selectbox("Family History with Overweight", ["yes", "no"])
-            favc = st.selectbox("Frequent High Caloric Food (FAVC)", ["yes", "no"])
+            favc = st.selectbox("Frequent High Caloric Food", ["yes", "no"])
         
         with col2:
             st.subheader("Eating Habits")
-            fcvc = st.slider("Vegetable Consumption (FCVC)", 1.0, 3.0, 2.0, 0.1)
-            ncp = st.slider("Number of Main Meals (NCP)", 1.0, 4.0, 3.0, 0.1)
-            caec = st.selectbox("Food Between Meals (CAEC)", 
+            fcvc = st.slider("Vegetable Consumption", 1.0, 3.0, 2.0, 0.1)
+            ncp = st.slider("Number of Main Meals", 1.0, 4.0, 3.0, 0.1)
+            caec = st.selectbox("Food Between Meals", 
                                ["no", "Sometimes", "Frequently", "Always"])
-            smoke = st.selectbox("Smoking (SMOKE)", ["yes", "no"])
-            ch2o = st.slider("Water Intake (CH2O)", 1.0, 3.0, 2.0, 0.1)
-            scc = st.selectbox("Calorie Monitoring (SCC)", ["yes", "no"])
+            smoke = st.selectbox("Smoking", ["yes", "no"])
+            ch2o = st.slider("Water Intake (liters)", 1.0, 3.0, 2.0, 0.1)
+            scc = st.selectbox("Calorie Monitoring", ["yes", "no"])
         
         with col3:
             st.subheader("Physical Activity & Lifestyle")
-            faf = st.slider("Physical Activity Frequency (FAF)", 0.0, 3.0, 1.0, 0.1)
-            tue = st.slider("Technology Use Time (TUE)", 0.0, 2.0, 1.0, 0.1)
-            calc = st.selectbox("Alcohol Consumption (CALC)", 
+            faf = st.slider("Physical Activity Frequency (days/week)", 0.0, 3.0, 1.0, 0.1)
+            tue = st.slider("Technology Use Time (hours)", 0.0, 2.0, 1.0, 0.1)
+            calc = st.selectbox("Alcohol Consumption", 
                                ["no", "Sometimes", "Frequently", "Always"])
-            mtrans = st.selectbox("Transportation (MTRANS)", 
+            mtrans = st.selectbox("Transportation", 
                                  ["Automobile", "Motorbike", "Bike", 
                                   "Public_Transportation", "Walking"])
         
