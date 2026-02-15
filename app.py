@@ -79,12 +79,12 @@ def load_models():
     """Load all saved models and preprocessors."""
     models = {}
     model_files = {
-        'Logistic Regression': 'logistic_regression.joblib',
-        'Decision Tree': 'decision_tree.joblib',
-        'K-Nearest Neighbors': 'k_nearest_neighbors.joblib',
-        'Naive Bayes': 'naive_bayes.joblib',
-        'Random Forest': 'random_forest.joblib',
-        'XGBoost': 'xgboost.joblib'
+        'Logistic Regression': 'logistic_regression.pkl',
+        'Decision Tree': 'decision_tree.pkl',
+        'K-Nearest Neighbors': 'k_nearest_neighbors.pkl',
+        'Naive Bayes': 'naive_bayes.pkl',
+        'Random Forest': 'random_forest.pkl',
+        'XGBoost': 'xgboost.pkl'
     }
     
     for name, filename in model_files.items():
@@ -93,9 +93,9 @@ def load_models():
             models[name] = joblib.load(filepath)
     
     # Load preprocessors
-    scaler = joblib.load('saved_models/scaler.joblib')
-    label_encoders = joblib.load('saved_models/label_encoders.joblib')
-    target_encoder = joblib.load('saved_models/target_encoder.joblib')
+    scaler = joblib.load('saved_models/scaler.pkl')
+    label_encoders = joblib.load('saved_models/label_encoders.pkl')
+    target_encoder = joblib.load('saved_models/target_encoder.pkl')
     
     return models, scaler, label_encoders, target_encoder
 
