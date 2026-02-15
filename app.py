@@ -46,14 +46,6 @@ st.markdown("""
         color: #34495e;
     }
     
-    /* Download section with proper contrast */
-    .download-section {
-        background-color: #f8f9fa;
-        padding: 1.5rem;
-        border-radius: 8px;
-        border-left: 4px solid #3498db;
-        margin: 1.5rem 0;
-    }
     
     /* Info boxes with readable colors */
     .info-note {
@@ -253,7 +245,6 @@ def main():
         st.header("Upload Test Data & Generate Predictions")
         
         # Download test data section
-        st.markdown('<div class="download-section">', unsafe_allow_html=True)
         st.subheader("Download Test Data")
         st.write("Download sample test data to evaluate the model or use as template:")
         
@@ -591,7 +582,7 @@ def main():
         ### Dataset Information
         
         - **Name:** Estimation of Obesity Levels Based on Eating Habits and Physical Condition
-        - **Source:** Kaggle (UCI Machine Learning Repository, ID: 544)
+        - **Source:** Kaggle 
         - **Instances:** 2,111
         - **Features:** 16 (8 categorical + 8 numerical)
         - **Target Classes:** 7 obesity levels
@@ -626,14 +617,7 @@ def main():
         ### Author
         
         **S Harish Sankaranarayanan**  
-        M.Tech (AIML/DSE)  
-        BITS Pilani - Work Integrated Learning Programme
         
-        ### Assignment Details
-        
-        - **Course:** Machine Learning
-        - **Assignment:** Assignment 2
-        - **Submission Deadline:** 15-Feb-2026
         """)
         
         # Feature descriptions
